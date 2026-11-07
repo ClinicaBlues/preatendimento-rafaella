@@ -222,7 +222,7 @@ function idade(n){ if(!n) return ''; var d=new Date(n+'T12:00:00'), h=new Date()
 var NAO_SEI = 'Ainda não sei';
 var NADA = /^(Nenhum|Nenhuma|Nada|Ninguém|Ninguém além de mim|Nunca tratei|Nenhum destes|Nenhum desses)$/;
 var CAP = ['Queda de cabelo ou afinamento','Entradas, coroa ou calvície','Transplante capilar','Falhas na sobrancelha','Falhas na barba'];
-var PELE = ['Pele: rugas, flacidez, viço','Pele: acne, manchas, melasma, rosácea','Pintas ou lesões na pele'];
+var PELE = ['Estética facial: toxina, preenchimento, bioestimulador','Pele: rugas, flacidez, viço','Pele: acne, manchas, melasma, rosácea','Pintas ou lesões na pele'];
 var TRANSP = ['Entradas, coroa ou calvície','Transplante capilar','Falhas na sobrancelha','Falhas na barba'];
 function any(arr, list){ return (arr||[]).some(function(x){ return list.indexOf(x) > -1; }); }
 
@@ -243,7 +243,6 @@ function STEPS(){ var a = S.a; var cap = any(a.objetivo, CAP), pele = any(a.obje
    {row:'2', q:[ {id:'nasc', t:'Data de nascimento', type:'dob', req:1, ph:'dd/mm/aaaa'}, {id:'sexo', t:'Sexo', type:'one', o:['Feminino','Masculino'], req:1} ]},
    {row:'2', q:[ {id:'whats', t:'WhatsApp', type:'tel', req:1, ph:'(31) 9 0000-0000', ac:'tel'}, {id:'email', t:'E-mail', type:'email', ac:'email'} ]},
    {id:'cidade', t:'Cidade onde mora', type:'text', ph:'Ex.: Belo Horizonte'},
-   {id:'modal', t:'Sua consulta será', type:'one', o:['Presencial em Belo Horizonte','Teleconsulta',NAO_SEI]},
    {id:'origem', t:'Como você chegou até a Dra. Rafaella?', type:'one', o:['Instagram','Indicação de paciente','Indicação de médico ou profissional','Google','Site','Outro']}
  ]},
  { k:'O que te traz', t:'O que te traz à <em>consulta</em>', lead:'Esta é a parte mais importante. Escreva com as suas palavras: não existe resposta errada.', q:[
@@ -259,12 +258,11 @@ function STEPS(){ var a = S.a; var cap = any(a.objetivo, CAP), pele = any(a.obje
    {show:function(){ return tr; }, id:'jaTransp', t:'Já fez transplante capilar antes?', type:'one', o:['Não','Sim, uma vez','Sim, mais de uma vez']},
    {show:function(){ return pele; }, id:'tratPele', t:'O que você já fez na pele?', hint:'Pode marcar mais de um.', type:'multi', o:['Ácidos ou retinoide','Toxina botulínica','Preenchimento','Bioestimulador de colágeno','Laser ou peeling','Remédio para acne (ex.: isotretinoína)','Nunca tratei']},
    {show:function(){ return pele; }, id:'protetor', t:'Usa protetor solar no rosto?', type:'one', o:['Todos os dias','Às vezes','Não uso']},
-   {id:'expect', t:'O que você espera desta consulta?', hint:'Pode marcar mais de um.', type:'multi', req:1, o:['Descobrir a causa','Parar a queda','Recuperar volume e densidade','Saber se sou candidata(o) a transplante','Tratar a pele com resultado natural','Ter um plano com acompanhamento','Uma segunda opinião']}
+   {id:'expect', t:'O que você espera desta consulta?', hint:'Pode marcar mais de um.', type:'multi', req:1, o:['Descobrir a causa','Parar a queda','Recuperar volume e densidade','Saber se sou candidata(o) a transplante','Tratar a pele com resultado natural','Procedimentos estéticos','Ter um plano com acompanhamento','Uma segunda opinião']}
  ]},
  { k:'Seu momento', t:'Como você está <em>hoje</em>', intro:'Respostas rápidas. Elas mostram à Dra. Rafaella o peso real disso no seu dia a dia e servem de ponto de partida para medir a sua evolução.', q:[
    {id:'atrapalha', t:'De 0 a 10, quanto isso incomoda você hoje?', type:'scale', req:1, l:['nada','muito']},
-   {lik:IMPACTO, t:'Nas últimas 4 semanas, quanto isso afetou…', o:IMP_O, req:1},
-   {lik:[['phq1','Pouco interesse ou pouco prazer em fazer as coisas'],['phq2','Se sentiu para baixo, desanimado(a) ou sem perspectiva']], t:'Nas últimas 2 semanas, com que frequência você…', o:PHQ_O, req:1}
+   {lik:IMPACTO, t:'Nas últimas 4 semanas, quanto isso afetou…', o:IMP_O, req:1}
  ]},
  { k:'O que está em jogo', t:'Onde você quer <em>chegar</em>', lead:'Estas perguntas não são sobre sintomas, são sobre a sua vida. Elas ajudam a Dra. Rafaella a montar um caminho do tamanho do que você precisa.', q:[
    {id:'seisMeses', t:'Daqui a 6 meses, como você quer estar?', hint:'Imagine que deu certo. O que mudou?', type:'area', req:1, ph:'Ex.: Prender o cabelo sem ver falhas, sair nas fotos sem me preocupar…'},
@@ -430,7 +428,6 @@ function scores(a){
 }
 function alerts(a, sc){
   var L=[];
-  if (sc.phq2Pos) L.push(['r','Rastreio de humor positivo (PHQ-2 = '+sc.phq2+'/6)','Queda de cabelo e autoimagem afetam o humor. Vale aprofundar na consulta (PHQ-9).']);
   if ((a.gest && a.gest!=='Não') || a.ciclo==='Grávida ou amamentando') L.push(['r','Gestação / amamentação: '+(a.gest||a.ciclo),'Atenção a minoxidil oral, antiandrogênicos e procedimentos.']);
   if (has(a.padrao,'Falhas arredondadas')) L.push(['w','Falhas arredondadas','Sugere avaliar alopecia areata.']);
   if (has(a.padrao,'Coceira, caspa ou descamação')) L.push(['w','Coceira, caspa ou descamação','Avaliar dermatite seborreica ou alopecia cicatricial.']);
@@ -451,31 +448,30 @@ function buildSummary(){
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:'+C.ink+';max-width:680px;margin:0 auto">';
   h+='<div style="background:#1C1310;color:#F3E9DA;padding:18px 20px"><div style="color:#C4642F;font-size:11px;letter-spacing:3px">PRÉ-CONSULTA · '+esc((CFG.doctorName||'').toUpperCase())+'</div>';
   h+='<div style="font-family:Georgia,serif;font-size:22px;margin-top:6px">'+esc(a.nome)+(id!==''?' · '+id+' anos':'')+'</div>';
-  h+='<div style="color:#B8A797;font-size:13px;margin-top:3px">'+esc([a.sexo,a.cidade,a.modal].filter(Boolean).join(' · '))+'</div></div>';
-  var kp=function(n,l,d,c){ return '<td style="padding:10px;border:1px solid '+C.l+';text-align:center;width:25%"><div style="font-size:20px;font-weight:bold;color:'+(c||C.ink)+'">'+n+'</div><div style="font-size:11px;color:'+C.m+';text-transform:uppercase;letter-spacing:1px">'+l+'</div><div style="font-size:11px;color:'+C.g+'">'+d+'</div></td>'; };
+  h+='<div style="color:#B8A797;font-size:13px;margin-top:3px">'+esc([a.sexo,a.cidade].filter(Boolean).join(' · '))+'</div></div>';
+  var kp=function(n,l,d,c){ return '<td style="padding:10px;border:1px solid '+C.l+';text-align:center;width:33%"><div style="font-size:20px;font-weight:bold;color:'+(c||C.ink)+'">'+n+'</div><div style="font-size:11px;color:'+C.m+';text-transform:uppercase;letter-spacing:1px">'+l+'</div><div style="font-size:11px;color:'+C.g+'">'+d+'</div></td>'; };
   h+='<table style="width:100%;border-collapse:collapse;margin-top:14px"><tr>'+
      kp((typeof a.atrapalha==='number'?a.atrapalha:'—')+'/10','Incômodo','relato da paciente')+
      kp(sc.impacto==null?'—':sc.impacto,'Impacto',sc.impactoFaixa+' · 0 a 100', sc.impacto>60?'#6E1B24':sc.impacto>40?'#C4642F':C.ink)+
-     kp(sc.phq2+'/6','Humor (PHQ-2)',sc.phq2Pos?'rastreio positivo':'negativo', sc.phq2Pos?'#6E1B24':C.ink)+
      kp((typeof a.prontidao==='number'?a.prontidao:'—')+'/10','Prontidão',esc(a.conducao||''))+'</tr></table>';
   if (al.length){ h+='<div style="margin-top:14px">'; al.forEach(function(x){ var bg=x[0]==='r'?'#FBEFEC':x[0]==='w'?'#FBF3E6':'#F5F0EA', bar=x[0]==='r'?'#6E1B24':x[0]==='w'?'#C4642F':'#B8A797'; h+='<div style="background:'+bg+';border-left:4px solid '+bar+';padding:9px 12px;margin-bottom:6px;font-size:13.5px"><b>'+esc(x[1])+'</b>'+(x[2]?'<br><span style="color:'+C.g+'">'+esc(x[2])+'</span>':'')+'</div>'; }); h+='</div>'; }
   h+='<div style="background:'+C.s+';border-left:4px solid '+C.b+';padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.55"><b>Busca:</b> '+esc(list(a.objetivo))+' · '+esc(a.tempo||'')+'<br><b>Relato:</b> '+esc(a.queixa||'').replace(/\n/g,'<br>')+'<br><b>Daqui a 6 meses quer:</b> '+esc(a.seisMeses||'').replace(/\n/g,'<br>')+'</div>';
-  h+=sec('Identificação', row('Nome',a.nome)+row('Nascimento', a.nasc ? a.nasc.split('-').reverse().join('/')+(id!==''?' ('+id+' anos)':'') : '')+row('Sexo',a.sexo)+row('WhatsApp',a.whats)+row('E-mail',a.email)+row('Cidade',a.cidade)+row('Consulta',a.modal)+row('Como chegou',a.origem)+row('Link de origem',a._origem));
+  h+=sec('Identificação', row('Nome',a.nome)+row('Nascimento', a.nasc ? a.nasc.split('-').reverse().join('/')+(id!==''?' ('+id+' anos)':'') : '')+row('Sexo',a.sexo)+row('WhatsApp',a.whats)+row('E-mail',a.email)+row('Cidade',a.cidade)+row('Como chegou',a.origem)+row('Link de origem',a._origem));
   h+=sec('Cabelo', row('Como percebe',a.padrao)+row('Possível gatilho',a.gatilho)+row('Histórico familiar',a.familia)+row('Já usou',a.tratCap)+row('Ciclo',a.ciclo)+row('Transplante: raspagem',a.raspagem)+row('Transplante anterior',a.jaTransp));
   h+=sec('Pele', row('Já fez',a.tratPele)+row('Protetor solar',a.protetor));
   h+=sec('Expectativa', row('Espera da consulta',a.expect)+row('Condução preferida',a.conducao)+row('Prontidão (0–10)',a.prontidao)+row('Decide com',a.decide));
   var imp=IMPACTO.map(function(x){ return typeof a[x[0]]==='number' ? row(x[1], IMP_O[a[x[0]]]) : ''; }).join('');
-  h+=sec('Momento atual', row('Incômodo (0–10)',a.atrapalha)+imp+row('Pouco interesse ou prazer',PHQ_O[a.phq1])+row('Para baixo, sem perspectiva',PHQ_O[a.phq2]));
+  h+=sec('Momento atual', row('Incômodo (0–10)',a.atrapalha)+imp);
   h+=sec('Saúde', row('Doenças',a.doencas)+row('Remédios em uso',a.remedios)+row('Alergias',a.alergias)+row('Gestação / amamentação',a.gest)+row('Exames recentes',a.exames)+row('Observações',a.obs));
-  h+='<p style="color:'+C.m+';font-size:11px;margin-top:22px;line-height:1.5">Impacto: 6 itens (0–4) de qualidade de vida ligados à autoimagem, convertidos para 0–100 (0–20 leve · 21–40 moderado · 41–60 importante · 61–100 grave). PHQ-2: 2 primeiros itens do PHQ-9; ≥ 3 sugere aplicar o PHQ-9 completo. Formulário de triagem, sem valor diagnóstico. Consentimento LGPD registrado em '+new Date().toLocaleString('pt-BR')+'.</p></div>';
+  h+='<p style="color:'+C.m+';font-size:11px;margin-top:22px;line-height:1.5">Impacto: 6 itens (0–4) de qualidade de vida ligados à autoimagem, convertidos para 0–100 (0–20 leve · 21–40 moderado · 41–60 importante · 61–100 grave). Formulário de triagem, sem valor diagnóstico. Consentimento LGPD registrado em '+new Date().toLocaleString('pt-BR')+'.</p></div>';
 
   var L=function(k,v){ v=list(v); return v ? k+': '+v+'\n' : ''; };
-  var txt = '*PRÉ-CONSULTA · '+(CFG.doctorName||'')+'*\n'+(a.nome||'')+(id!==''?' · '+id+' anos':'')+(a.sexo?' · '+a.sexo:'')+'\n'+L('WhatsApp',a.whats)+L('Cidade',a.cidade)+L('Consulta',a.modal)+
+  var txt = '*PRÉ-CONSULTA · '+(CFG.doctorName||'')+'*\n'+(a.nome||'')+(id!==''?' · '+id+' anos':'')+(a.sexo?' · '+a.sexo:'')+'\n'+L('WhatsApp',a.whats)+L('Cidade',a.cidade)+
     (al.length?'\n⚠ *Pontos de atenção*\n'+al.map(function(x){ return '- '+x[1]; }).join('\n')+'\n':'')+
     '\n'+L('Busca',a.objetivo)+L('Há quanto tempo',a.tempo)+L('Relato',a.queixa)+L('Cabelo',a.padrao)+L('Gatilho',a.gatilho)+L('Família',a.familia)+L('Já usou (cabelo)',a.tratCap)+L('Ciclo',a.ciclo)+L('Transplante',a.raspagem)+L('Pele já fez',a.tratPele)+L('Protetor',a.protetor)+L('Espera',a.expect)+
-    '\nIncômodo: '+a.atrapalha+'/10 · Impacto: '+sc.impacto+'/100 ('+sc.impactoFaixa+') · PHQ-2: '+sc.phq2+'/6 · Prontidão: '+a.prontidao+'/10\n'+L('Condução',a.conducao)+L('Em 6 meses',a.seisMeses)+
+    '\nIncômodo: '+a.atrapalha+'/10 · Impacto: '+sc.impacto+'/100 ('+sc.impactoFaixa+') · Prontidão: '+a.prontidao+'/10\n'+L('Condução',a.conducao)+L('Em 6 meses',a.seisMeses)+
     '\n'+L('Doenças',a.doencas)+L('Remédios',a.remedios)+L('Alergias',a.alergias)+L('Gestação',a.gest)+L('Exames',a.exames)+L('Obs.',a.obs);
-  var subj = (sc.phq2Pos?'[Atenção humor] ':'') + 'Pré-consulta · ' + (a.nome||'paciente') + (id!==''?' · '+id+' anos':'') + ' · ' + (list(a.objetivo).split(',')[0]||'');
+  var subj = 'Pré-consulta · ' + (a.nome||'paciente') + (id!==''?' · '+id+' anos':'') + ' · ' + (list(a.objetivo).split(',')[0]||'');
   return { html:h, text:txt, subject:subj };
 }
 
